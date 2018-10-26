@@ -27,6 +27,7 @@ public class DoubleBallCrawler {
     //03年第1期开奖页面
     private static String url = "http://kaijiang.500.com/shtml/ssq/03001.shtml";
 
+    //TODO:修改多线程
     public static void main(String[] args) throws Exception{
         Document doc = Jsoup.connect(url).get();
         Elements aElements =doc.select(".iSelectList > a");
