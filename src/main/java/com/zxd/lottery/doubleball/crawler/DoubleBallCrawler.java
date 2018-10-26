@@ -7,7 +7,11 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.sort;
 
 /**
  * @author CoderZZ
@@ -23,14 +27,14 @@ public class DoubleBallCrawler {
     //03年第1期开奖页面
     private static String url = "http://kaijiang.500.com/shtml/ssq/03001.shtml";
 
-    public static void main(String[] args){
-        try {
-            Document doc = Jsoup.connect(url).get();
-            Elements aElements =doc.select(".iSelectList > a");
-            if(null != aElements){
-                System.out.println("一共期数为:"+aElements.size());
-                List<ResultDto> resultDtoList = new ArrayList<ResultDto>(2500);
-                for(Element a:aElements){
+    public static void main(String[] args) throws Exception{
+        Document doc = Jsoup.connect(url).get();
+        Elements aElements =doc.select(".iSelectList > a");
+        if(null != aElements){
+            System.out.println("一共期数为:"+aElements.size());
+            List<ResultDto> resultDtoList = new ArrayList<ResultDto>(2500);
+            for(Element a:aElements){
+                try {
                     ResultDto resultDto = new ResultDto();
                     resultDto.setNumber(a.text());
                     resultDto.setHref(a.attr("href"));
@@ -56,10 +60,15 @@ public class DoubleBallCrawler {
                         }
                     }
                     System.out.println(resultDto.toString());
+                    resultDtoList.add(resultDto);
+                }catch (Exception e){
+                    System.err.println("爬取双色球第"+a.text()+"期开奖结果异常(开奖结果详情页:"+a.attr("href")
+                            + ").异常信息:"+e.getMessage());
                 }
             }
-        }catch (Exception e){
-            System.err.println("双色球开奖结果爬取异常.异常信息:"+e.getMessage());
+            System.out.println(resultDtoList);
+            Collections.sort(resultDtoList);
+            System.out.println(resultDtoList);
         }
     }
 }
