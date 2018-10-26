@@ -23,39 +23,43 @@ public class DoubleBallCrawler {
     //03年第1期开奖页面
     private static String url = "http://kaijiang.500.com/shtml/ssq/03001.shtml";
 
-    public static void main(String[] args) throws IOException {
-        Document doc = Jsoup.connect(url).get();
-        Elements aElements =doc.select(".iSelectList > a");
-        if(null != aElements){
-            System.out.println("一共期数为:"+aElements.size());
-            List<ResultDto> resultDtoList = new ArrayList<ResultDto>(2500);
-            for(Element a:aElements){
-                ResultDto resultDto = new ResultDto();
-                resultDto.setNumber(a.text());
-                resultDto.setHref(a.attr("href"));
-                doc = Jsoup.connect(a.attr("href")).get();
-                Elements balls =doc.select("div.ball_box01 li");
-                for(int i=0;i<balls.size();i++){
-                    Element ball = balls.get(i);
-                    switch (i){
-                        case 0:
-                            resultDto.setRed1(ball.text());
-                        case 1:
-                            resultDto.setRed2(ball.text());
-                        case 2:
-                            resultDto.setRed3(ball.text());
-                        case 3:
-                            resultDto.setRed4(ball.text());
-                        case 4:
-                            resultDto.setRed5(ball.text());
-                        case 5:
-                            resultDto.setRed6(ball.text());
-                        case 6:
-                            resultDto.setBlue(ball.text());
+    public static void main(String[] args){
+        try {
+            Document doc = Jsoup.connect(url).get();
+            Elements aElements =doc.select(".iSelectList > a");
+            if(null != aElements){
+                System.out.println("一共期数为:"+aElements.size());
+                List<ResultDto> resultDtoList = new ArrayList<ResultDto>(2500);
+                for(Element a:aElements){
+                    ResultDto resultDto = new ResultDto();
+                    resultDto.setNumber(a.text());
+                    resultDto.setHref(a.attr("href"));
+                    doc = Jsoup.connect(a.attr("href")).get();
+                    Elements balls =doc.select("div.ball_box01 li");
+                    for(int i=0;i<balls.size();i++){
+                        Element ball = balls.get(i);
+                        switch (i){
+                            case 0:
+                                resultDto.setRed1(ball.text());
+                            case 1:
+                                resultDto.setRed2(ball.text());
+                            case 2:
+                                resultDto.setRed3(ball.text());
+                            case 3:
+                                resultDto.setRed4(ball.text());
+                            case 4:
+                                resultDto.setRed5(ball.text());
+                            case 5:
+                                resultDto.setRed6(ball.text());
+                            case 6:
+                                resultDto.setBlue(ball.text());
+                        }
                     }
+                    System.out.println(resultDto.toString());
                 }
-                System.out.println(resultDto.toString());
             }
+        }catch (Exception e){
+            System.err.println("双色球开奖结果爬取异常.异常信息:"+e.getMessage());
         }
     }
 }
