@@ -21,6 +21,10 @@ import java.util.concurrent.*;
  **/
 public class DoubleBallCrawler {
 
+    private static String url_prefix = "http://kaijiang.500.com/shtml/ssq/";
+
+    private static String url_suffix = ".shtml";
+
     //03年第1期开奖页面
     private static String url = "http://kaijiang.500.com/shtml/ssq/03001.shtml";
 
@@ -33,6 +37,26 @@ public class DoubleBallCrawler {
     private static Vector<ResultDto> resultDtoList = new Vector<ResultDto>(2500);
 
     public static void main(String[] args) throws Exception{
+        //批量抓取所有
+        crawlerForBatch();
+
+        //抓取单期开奖结果
+        ResultDto resultDto = crawlerForOnce("03001");
+
+
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName crawlerForBatch
+     * @Desc 批量多线程抓取信息
+     * @author zouxiaodong
+     * @date 2018/10/27 15:39
+     * @Params []
+     * @return void
+     */
+    public static void crawlerForBatch(){
         try {
             Document doc = Jsoup.connect(url).get();
             Elements aElements =doc.select(".iSelectList > a");
@@ -55,26 +79,7 @@ public class DoubleBallCrawler {
                                 ResultDto resultDto = resultDtoList.get(j);
                                 try {
                                     Document detailDoc = Jsoup.connect(resultDto.getHref()).get();
-                                    Elements balls = detailDoc.select("div.ball_box01 li");
-                                    for(int k=0;k<balls.size();k++){
-                                        Element ball = balls.get(k);
-                                        switch (k){
-                                            case 0:
-                                                resultDto.setRed1(ball.text());
-                                            case 1:
-                                                resultDto.setRed2(ball.text());
-                                            case 2:
-                                                resultDto.setRed3(ball.text());
-                                            case 3:
-                                                resultDto.setRed4(ball.text());
-                                            case 4:
-                                                resultDto.setRed5(ball.text());
-                                            case 5:
-                                                resultDto.setRed6(ball.text());
-                                            case 6:
-                                                resultDto.setBlue(ball.text());
-                                        }
-                                    }
+                                    getLotteryInfo(detailDoc,resultDto);
                                 } catch (IOException e) {
                                     System.err.println("爬取双色球第"+resultDto.getNumber()+"期开奖结果异常(开奖结果详情页:"+resultDto.getHref()+ ").异常信息:"+e.getMessage());
                                 }
@@ -93,6 +98,70 @@ public class DoubleBallCrawler {
             }
         }catch (Exception e){
             System.err.println("爬取"+url+ "异常.异常信息:"+e.getMessage());
+        }
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName crawlerForOnce
+     * @Desc 抓取某一期信息
+     * @author zouxiaodong
+     * @date 2018/10/27 15:26
+     * @Params [num 期号]
+     * @return void
+     */
+    public static ResultDto crawlerForOnce(String num){
+        String url = url_prefix + num + url_suffix;
+        ResultDto resultDto = new ResultDto();
+        try {
+            Document detailDoc = Jsoup.connect(url).get();
+            getLotteryInfo(detailDoc,resultDto);
+        } catch (IOException e) {
+            System.err.println("爬取双色球第"+resultDto.getNumber()+"期开奖结果异常(开奖结果详情页:"+resultDto.getHref()+ ").异常信息:"+e.getMessage());
+        }
+        return resultDto;
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName getLotteryInfo
+     * @Desc doc转dto
+     * @author zouxiaodong
+     * @date 2018/10/27 15:34
+     * @Params [detailDoc, resultDto]
+     * @return void
+     */
+    private static void getLotteryInfo(Document detailDoc,ResultDto resultDto){
+        Elements balls = detailDoc.select("div.ball_box01 li");
+        for(int k=0;k<balls.size();k++){
+            Element ball = balls.get(k);
+            switch (k){
+                case 0:
+                    resultDto.setRed1(ball.text());
+                    break;
+                case 1:
+                    resultDto.setRed2(ball.text());
+                    break;
+                case 2:
+                    resultDto.setRed3(ball.text());
+                    break;
+                case 3:
+                    resultDto.setRed4(ball.text());
+                    break;
+                case 4:
+                    resultDto.setRed5(ball.text());
+                    break;
+                case 5:
+                    resultDto.setRed6(ball.text());
+                    break;
+                case 6:
+                    resultDto.setBlue(ball.text());
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
