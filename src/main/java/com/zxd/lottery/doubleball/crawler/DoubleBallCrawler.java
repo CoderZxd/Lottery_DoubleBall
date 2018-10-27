@@ -5,10 +5,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Vector;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static java.lang.Thread.currentThread;
 
 /**
  * @author CoderZZ
@@ -36,14 +42,17 @@ public class DoubleBallCrawler {
     //线程安全list,TODO:可以改为普通list
     private static Vector<ResultDto> resultDtoList = new Vector<ResultDto>(2500);
 
+    private static String fileName = "lottery.txt";
+
     public static void main(String[] args) throws Exception{
         //批量抓取所有
-        crawlerForBatch();
+//        crawlerForBatch();
+//
+//        //抓取单期开奖结果
+//        ResultDto resultDto = crawlerForOnce("03001");
 
-        //抓取单期开奖结果
-        ResultDto resultDto = crawlerForOnce("03001");
-
-
+        //将批量信息写入本地
+//        writeLotteryInfoToFile(fileName,resultDtoList);
     }
 
     /**
@@ -84,7 +93,7 @@ public class DoubleBallCrawler {
                                     System.err.println("爬取双色球第"+resultDto.getNumber()+"期开奖结果异常(开奖结果详情页:"+resultDto.getHref()+ ").异常信息:"+e.getMessage());
                                 }
                             }
-                            System.out.println(Thread.currentThread().getName()+"抓取结束!");
+                            System.out.println(currentThread().getName()+"抓取结束!");
                             countDownLatch.countDown();
                         }
                     });
@@ -162,6 +171,28 @@ public class DoubleBallCrawler {
                 default:
                     break;
             }
+        }
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName writeLotteryInfoToFile
+     * @Desc 将开奖信息写入本地文件
+     * @author zouxiaodong
+     * @date 2018/10/27 15:54
+     * @Params [fileName, resultDtoList]
+     * @return void
+     */
+    private static void writeLotteryInfoToFile(String fileName,Vector<ResultDto> resultDtoList){
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(fileName),true);
+            for(ResultDto resultDto:resultDtoList){
+                fos.write(resultDto.toString().concat("\n").getBytes("UTF-8"));
+            }
+            fos.close();
+        } catch (Exception e) {
+            System.err.println("开奖信息写入本地文件异常.异常信息为:"+e.getMessage());
         }
     }
 }
