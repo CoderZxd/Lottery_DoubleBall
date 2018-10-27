@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -40,9 +41,15 @@ public class DoubleBallCrawler {
     private static CountDownLatch countDownLatch = new CountDownLatch(threadNum);
 
     //线程安全list,TODO:可以改为普通list
-    private static Vector<ResultDto> resultDtoList = new Vector<ResultDto>(2500);
+    private static List<ResultDto> resultDtoList = new Vector<ResultDto>(2500);
 
+    //抓取成功期数开奖信息写入该文件
     private static String fileName = "lottery.txt";
+
+    //抓取失败的期数写入该文件
+    private static String failureNumFileName = "failure.txt";
+
+    private static List<String> failureNums = new Vector<String>(10);
 
     public static void main(String[] args) throws Exception{
         //批量抓取所有
@@ -90,6 +97,8 @@ public class DoubleBallCrawler {
                                     Document detailDoc = Jsoup.connect(resultDto.getHref()).get();
                                     getLotteryInfo(detailDoc,resultDto);
                                 } catch (IOException e) {
+                                    //记录爬取失败的开奖期号
+                                    failureNums.add(resultDto.getNumber());
                                     System.err.println("爬取双色球第"+resultDto.getNumber()+"期开奖结果异常(开奖结果详情页:"+resultDto.getHref()+ ").异常信息:"+e.getMessage());
                                 }
                             }
@@ -100,6 +109,12 @@ public class DoubleBallCrawler {
                 }
                 countDownLatch.await();
                 System.out.println("所有线程抓取结束,程序继续执行.........");
+                //如果failureNums不为空，说明有爬取失败,将失败的期号写入本地文件
+                if(!failureNums.isEmpty()){
+                    System.out.println("存在爬取失败的期号,写入本地文件"+failureNumFileName+"中......");
+                    Collections.sort(failureNums);
+                    writeFailureNumToFile(failureNums);
+                }
                 System.out.println(resultDtoList);
                 Collections.sort(resultDtoList);
                 System.out.println(resultDtoList);
@@ -184,7 +199,7 @@ public class DoubleBallCrawler {
      * @Params [fileName, resultDtoList]
      * @return void
      */
-    private static void writeLotteryInfoToFile(String fileName,Vector<ResultDto> resultDtoList){
+    private static void writeLotteryInfoToFile(String fileName,List<ResultDto> resultDtoList){
         try {
             FileOutputStream fos = new FileOutputStream(new File(fileName),true);
             for(ResultDto resultDto:resultDtoList){
@@ -193,6 +208,28 @@ public class DoubleBallCrawler {
             fos.close();
         } catch (Exception e) {
             System.err.println("开奖信息写入本地文件异常.异常信息为:"+e.getMessage());
+        }
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName writeFailureNumToFile
+     * @Desc 将失败的期数写入本地文件
+     * @author zouxiaodong
+     * @date 2018/10/27 17:31
+     * @Params [numbers]
+     * @return void
+     */
+    private static void writeFailureNumToFile(List<String> numbers){
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(failureNumFileName),true);
+            for(String num:numbers){
+                fos.write(num.concat("\n").getBytes("UTF-8"));
+            }
+            fos.close();
+        } catch (Exception e) {
+            System.err.println("异常期号写入本地文件异常.异常信息为:"+e.getMessage());
         }
     }
 }
