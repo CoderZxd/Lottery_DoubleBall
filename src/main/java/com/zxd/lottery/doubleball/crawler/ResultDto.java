@@ -180,6 +180,6 @@ public class ResultDto implements Comparable<ResultDto>{
      */
     @Override
     public int compareTo(ResultDto o) {
-        return this.getNumber().compareTo(o.getNumber());
+        return o.getNumber().compareTo(this.getNumber());
     }
 }
