@@ -8,9 +8,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * @author CoderZZ
@@ -35,60 +33,66 @@ public class DoubleBallCrawler {
     private static Vector<ResultDto> resultDtoList = new Vector<ResultDto>(2500);
 
     public static void main(String[] args) throws Exception{
-        Document doc = Jsoup.connect(url).get();
-        Elements aElements =doc.select(".iSelectList > a");
-        if(null != aElements){
-            System.out.println("一共期数为:"+aElements.size());
-            for(Element aEle:aElements){
-                ResultDto resultDto = new ResultDto();
-                resultDto.setNumber(aEle.text());
-                resultDto.setHref(aEle.attr("href"));
-                resultDtoList.add(resultDto);
-            }
-            ExecutorService executorService = new ScheduledThreadPoolExecutor(threadNum);
-            for(int i=0;i<threadNum;i++){
-                final int localI = i;
-                executorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int j=localI;j<resultDtoList.size();j=j+threadNum) {
-                            ResultDto resultDto = resultDtoList.get(j);
-                            try {
-                                Document detailDoc = Jsoup.connect(resultDto.getHref()).get();
-                                Elements balls = detailDoc.select("div.ball_box01 li");
-                                for(int k=0;k<balls.size();k++){
-                                    Element ball = balls.get(k);
-                                    switch (k){
-                                        case 0:
-                                            resultDto.setRed1(ball.text());
-                                        case 1:
-                                            resultDto.setRed2(ball.text());
-                                        case 2:
-                                            resultDto.setRed3(ball.text());
-                                        case 3:
-                                            resultDto.setRed4(ball.text());
-                                        case 4:
-                                            resultDto.setRed5(ball.text());
-                                        case 5:
-                                            resultDto.setRed6(ball.text());
-                                        case 6:
-                                            resultDto.setBlue(ball.text());
+        try {
+            Document doc = Jsoup.connect(url).get();
+            Elements aElements =doc.select(".iSelectList > a");
+            if(null != aElements){
+                System.out.println("一共期数为:"+aElements.size());
+                for(Element aEle:aElements){
+                    ResultDto resultDto = new ResultDto();
+                    resultDto.setNumber(aEle.text());
+                    resultDto.setHref(aEle.attr("href"));
+                    resultDtoList.add(resultDto);
+                }
+                System.out.println(resultDtoList);
+                ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
+                for(int i=0;i<threadNum;i++){
+                    final int localI = i;
+                    executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(int j=localI;j<resultDtoList.size();j=j+threadNum) {
+                                ResultDto resultDto = resultDtoList.get(j);
+                                try {
+                                    Document detailDoc = Jsoup.connect(resultDto.getHref()).get();
+                                    Elements balls = detailDoc.select("div.ball_box01 li");
+                                    for(int k=0;k<balls.size();k++){
+                                        Element ball = balls.get(k);
+                                        switch (k){
+                                            case 0:
+                                                resultDto.setRed1(ball.text());
+                                            case 1:
+                                                resultDto.setRed2(ball.text());
+                                            case 2:
+                                                resultDto.setRed3(ball.text());
+                                            case 3:
+                                                resultDto.setRed4(ball.text());
+                                            case 4:
+                                                resultDto.setRed5(ball.text());
+                                            case 5:
+                                                resultDto.setRed6(ball.text());
+                                            case 6:
+                                                resultDto.setBlue(ball.text());
+                                        }
                                     }
+                                } catch (IOException e) {
+                                    System.err.println("爬取双色球第"+resultDto.getNumber()+"期开奖结果异常(开奖结果详情页:"+resultDto.getHref()+ ").异常信息:"+e.getMessage());
                                 }
-                            } catch (IOException e) {
-                                System.err.println("爬取双色球第"+resultDto.getNumber()+"期开奖结果异常(开奖结果详情页:"+resultDto.getHref()+ ").异常信息:"+e.getMessage());
                             }
+                            System.out.println(Thread.currentThread().getName()+"抓取结束!");
+                            countDownLatch.countDown();
                         }
-                        System.out.println(Thread.currentThread().getName()+"抓取结束!");
-                        countDownLatch.countDown();
-                    }
-                });
+                    });
+                }
+                countDownLatch.await();
+                System.out.println("所有线程抓取结束,程序继续执行.........");
+                System.out.println(resultDtoList);
+                Collections.sort(resultDtoList);
+                System.out.println(resultDtoList);
+                executorService.shutdown();
             }
-            countDownLatch.await();
-            System.out.println("所有线程抓取结束,程序继续执行.........");
-            System.out.println(resultDtoList);
-            Collections.sort(resultDtoList);
-            System.out.println(resultDtoList);
+        }catch (Exception e){
+            System.err.println("爬取"+url+ "异常.异常信息:"+e.getMessage());
         }
     }
 }
