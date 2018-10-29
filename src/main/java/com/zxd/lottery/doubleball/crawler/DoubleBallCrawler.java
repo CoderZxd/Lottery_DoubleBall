@@ -141,6 +141,15 @@ public class DoubleBallCrawler {
      **/
     public static void crawlerBarchForFailure(List<String> numbersList){
         try {
+            String[] proxyArray = new String[]{"118.190.95.35:9001","140.224.108.227:53281","61.135.217.7:80","115.46.66.25:8123","113.77.87.113:8118","222.182.56.234:8118","222.76.74.214:808","113.16.160.101:8118","113.102.80.39:8118","101.132.98.70:808"};
+            final List<Map<String,String>> proxyList = new ArrayList<Map<String,String>>(10);
+            for(String proxy:proxyArray){
+                String[] ipAndPort = proxy.split(":");
+                Map<String,String> temp = new HashMap<String,String>(16);
+                temp.put("ip",ipAndPort[0]);
+                temp.put("port",ipAndPort[1]);
+                proxyList.add(temp);
+            }
             if(null != numbersList && !numbersList.isEmpty()){
                 for(String num:numbersList){
                     ResultDto resultDto = new ResultDto();
@@ -158,8 +167,11 @@ public class DoubleBallCrawler {
                         public void run() {
                             for(int j=localI;j<resultDtoList.size();j=j+threadNum) {
                                 ResultDto resultDto = resultDtoList.get(j);
+                                String ip = proxyList.get(localI).get("ip");
+                                String port = proxyList.get(localI).get("port");
+                                System.out.println("proxy@@@@@@@@@@@@@"+ip+":"+port);
                                 try {
-                                    Document detailDoc = Jsoup.connect(resultDto.getHref()).get();
+                                    Document detailDoc = Jsoup.connect(resultDto.getHref()).timeout(5000).proxy(ip,Integer.parseInt(port)).get();
                                     getLotteryInfo(detailDoc,resultDto);
                                 } catch (IOException e) {
                                     //记录爬取失败的开奖期号
@@ -185,6 +197,23 @@ public class DoubleBallCrawler {
             }
         }catch (Exception e){
             System.err.println("爬取"+url+ "异常.异常信息:"+e.getMessage());
+        }
+    }
+
+    /**
+     * class_name: checkProxy
+     * param: [ip, port]
+     * describe: 检查代理是否可用
+     * creat_user: CoderZZ
+     * creat_date: 2018-10-30
+     * creat_time: 0:50
+     **/
+    private static boolean checkProxy(String ip, Integer port) {
+        try {
+            Jsoup.connect("https://www.baidu.com/").timeout(2000).proxy(ip, port).get();
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
