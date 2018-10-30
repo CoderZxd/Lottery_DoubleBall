@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <!--<property name="maxActive" value="${pool.maxPoolSize}"/>-->
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <!-- 超过时间限制是否回收 -->
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <!--<property name="minEvictableIdleTimeMillis" value="${pool.minEvictableIdleTimeMillis}"/>-->
+        <!--<property name="validationQuery" value="${pool.validationQuery} "/>-->
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:com/zxd/lottery/doubleball/crawler/dao/mybatis/*.xml"/>
+        <!-- <property name="configLocation" value="/WEB-INF/batis/com.mobanker.component.logcenter.service.daofig.xml" /> -->
+        <!-- 自动扫描entity目录, 省掉Configuration.xml里的手工配置 -->
+    </bean>
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zxd.lottery.doubleball.crawler.dao.**"/>
+        <property name="sqlSessionTemplateBeanName" value="sqlSession"/>
+    </bean>
+
+
+    <!-- 事务注解驱动，标注@Transactional的类和方法将具有事务性 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 事务注解驱动，标注@Transactional的类和方法将具有事务性 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
