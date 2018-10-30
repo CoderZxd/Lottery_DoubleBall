@@ -25,6 +25,12 @@ import static java.lang.Thread.currentThread;
  **/
 public class IpPoolCrawler {
 
+    //url前缀
+    private static String ipProxyUrl_prefix = "http://www.xicidaili.com/nn/";
+
+    //默认爬取起始页
+    private static int startPage = 1;
+
     //第一页地址
     private static String ipProxyUrl = "http://www.xicidaili.com/nn/1";
 
@@ -37,11 +43,17 @@ public class IpPoolCrawler {
     //检查可以用的代理ip,线程安全
     private static List<IpInfo> enableIpProxyList = new Vector<IpInfo>(10);
 
+    //多线程抓取
+    private static int threadNum = 2;
+
     //多线程check
-    private static int threadNum = 10;
+    private static int checkThreadNum = 20;
 
 
     private static CountDownLatch countDownLatch = new CountDownLatch(threadNum);
+
+
+
     /**
      * class_name: checkProxy
      * param: [ip, port]
@@ -55,7 +67,7 @@ public class IpPoolCrawler {
             Jsoup.connect(proxyCheckUrl).timeout(5000).proxy(ip, port).get();
             return true;
         } catch (Exception e) {
-            System.err.println("代理IP不可用。异常信息为:"+e.getMessage());
+            System.err.println("线程"+Thread.currentThread().getName()+"校验代理IP("+ip+":"+port+")不可用。异常信息为:"+e.getMessage());
             return false;
         }
     }
@@ -73,13 +85,14 @@ public class IpPoolCrawler {
      */
     private static void MultiThreadToCheckProxy(){
         try {
-            ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
-            for(int i=0;i<threadNum;i++){
+            countDownLatch = new CountDownLatch(checkThreadNum);
+            ExecutorService executorService = Executors.newFixedThreadPool(checkThreadNum);
+            for(int i=0;i<checkThreadNum;i++){
                 final int localI = i;
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        for(int j=localI;j<ipInfoList.size();j=j+threadNum) {
+                        for(int j=localI;j<ipInfoList.size();j=j+checkThreadNum) {
                             IpInfo ipInfo = ipInfoList.get(j);
                             boolean b = checkProxy(ipInfo.getIp(),ipInfo.getPort());
                             if(b){
@@ -87,11 +100,12 @@ public class IpPoolCrawler {
                             }
                         }
                         countDownLatch.countDown();
-                        System.out.println(currentThread().getName()+"抓取结束!");
+                        System.out.println(currentThread().getName()+"校验结束!");
                     }
                 });
             }
             countDownLatch.await();
+            executorService.shutdown();
             System.out.println("enableIpProxyList:"+enableIpProxyList);
         } catch (InterruptedException e) {
             System.out.println("多线程校验代理异常.异常信息为:"+e.getMessage());
@@ -137,6 +151,40 @@ public class IpPoolCrawler {
     /**
      * @FileName IpPoolCrawler.java
      * @ClassName IpPoolCrawler
+     * @MethodName multiThreadCrawlerIps
+     * @Desc 多线程抓取代理ip
+     * @author zouxiaodong
+     * @date 2018/10/30 17:44
+     * @Params []
+     * @return void
+     */
+    private static void multiThreadCrawlerIps(){
+        try {
+            ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
+            for(int i=0;i<threadNum;i++){
+                final int localI = i;
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        crawlerIps(ipProxyUrl_prefix+(startPage+localI));
+                        countDownLatch.countDown();
+                        System.out.println(currentThread().getName()+"抓取结束!");
+                    }
+                });
+            }
+            countDownLatch.await();
+            executorService.shutdown();
+            System.out.println("===所有线程爬取结束!===");
+            System.out.println(ipInfoList);
+            MultiThreadToCheckProxy();
+        } catch (InterruptedException e) {
+            System.out.println("多线程爬取IP代理异常.异常信息为:"+e.getMessage());
+        }
+    }
+
+    /**
+     * @FileName IpPoolCrawler.java
+     * @ClassName IpPoolCrawler
      * @MethodName main
      * @Desc 测试代码
      * @author zouxiaodong
@@ -145,7 +193,7 @@ public class IpPoolCrawler {
      * @return void
      */
     public static void main(String[] args){
-        crawlerIps(ipProxyUrl);
-        MultiThreadToCheckProxy();
+//        crawlerIps(ipProxyUrl);
+        multiThreadCrawlerIps();
     }
 }
