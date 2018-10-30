@@ -29,7 +29,7 @@ public class IpPoolCrawler {
     private static String ipProxyUrl_prefix = "http://www.xicidaili.com/nn/";
 
     //默认爬取起始页
-    private static int startPage = 1;
+    private static int startPage = 20;
 
     //第一页地址
     private static String ipProxyUrl = "http://www.xicidaili.com/nn/1";
@@ -65,9 +65,10 @@ public class IpPoolCrawler {
     private static boolean checkProxy(String ip, Integer port) {
         try {
             Jsoup.connect(proxyCheckUrl).timeout(5000).proxy(ip, port).get();
+            System.out.println("代理IP("+ip+":"+port+")可用。");
             return true;
         } catch (Exception e) {
-            System.err.println("线程"+Thread.currentThread().getName()+"校验代理IP("+ip+":"+port+")不可用。异常信息为:"+e.getMessage());
+//            System.err.println("线程"+Thread.currentThread().getName()+"校验代理IP("+ip+":"+port+")不可用。异常信息为:"+e.getMessage());
             return false;
         }
     }
