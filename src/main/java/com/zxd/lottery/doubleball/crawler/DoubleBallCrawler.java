@@ -81,10 +81,13 @@ public class DoubleBallCrawler {
         //将之前抓取的结果从文件中存入db
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
         ResultDao resultDao = applicationContext.getBean(ResultDao.class);
-        List<ResultDto> resultDtoList = getResultDtoFromFile();
-        for(ResultDto resultDto:resultDtoList){
-            resultDao.insert(resultDto);
-        }
+//        List<ResultDto> resultDtoList = getResultDtoFromFile();
+//        for(ResultDto resultDto:resultDtoList){
+//            resultDao.insert(resultDto);
+//        }
+
+        List<ResultDto> list = resultDao.getAll();
+        System.out.println();
     }
 
     /**
