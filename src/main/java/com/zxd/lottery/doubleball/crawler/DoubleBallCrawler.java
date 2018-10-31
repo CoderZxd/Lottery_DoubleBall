@@ -11,9 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -78,11 +76,55 @@ public class DoubleBallCrawler {
 //        numbersList = Arrays.asList(failureArrays);
 //        crawlerBarchForFailure(numbersList);
 //        writeLotteryInfoToFile(fileName,resultDtoList);
+
+
+        //将之前抓取的结果从文件中存入db
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
         ResultDao resultDao = applicationContext.getBean(ResultDao.class);
-        ResultDto resultDto1 = new ResultDto();
-        resultDto1.setNumber("123");
-        resultDao.insert(resultDto1);
+        List<ResultDto> resultDtoList = getResultDtoFromFile();
+        for(ResultDto resultDto:resultDtoList){
+            resultDao.insert(resultDto);
+        }
+    }
+
+    /**
+     * class_name: getResultDtoFromFile
+     * param: []
+     * describe: 将lottery.txt转换为对象存入数据库中
+     * creat_user: CoderZZ
+     * creat_date: 2018-11-01
+     * creat_time: 0:07
+     **/
+    private static List<ResultDto> getResultDtoFromFile(){
+        List<ResultDto> resultDtoList = new ArrayList<ResultDto>(2500);
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(fileName)));
+            String line;
+            while ((line = br.readLine())!= null){
+                ResultDto temp = new ResultDto();
+                String[] infoArray = line.split(",");
+                String numberInfo = infoArray[0];
+                String[] numberArray = numberInfo.split("\\s");
+                temp.setNumber(numberArray[1].substring(1,6));
+                String href = infoArray[1];
+                temp.setHref(href.substring(5));
+                String num = infoArray[2];
+                String[] numArray = num.split("\\|");
+                temp.setBlue(numArray[1].trim());
+                String red = numArray[0].trim();
+                String[] redArray = red.split("\\s");
+                temp.setRed1(redArray[0].substring(5));
+                temp.setRed2(redArray[1]);
+                temp.setRed3(redArray[2]);
+                temp.setRed4(redArray[3]);
+                temp.setRed5(redArray[4]);
+                temp.setRed6(redArray[5]);
+                resultDtoList.add(temp);
+            }
+        }catch (Exception e){
+            System.out.println("读取文件异常.异常信息为:"+e.getMessage());
+        }
+        return resultDtoList;
     }
 
     /**
