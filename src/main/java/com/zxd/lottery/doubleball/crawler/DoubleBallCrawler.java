@@ -1,5 +1,6 @@
 package com.zxd.lottery.doubleball.crawler;
 
+import com.zxd.lottery.doubleball.crawler.dao.model.ResultDto;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

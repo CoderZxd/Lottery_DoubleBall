@@ -1,8 +1,5 @@
-package com.zxd.lottery.doubleball.crawler;
+package com.zxd.lottery.doubleball.crawler.dao.model;
 
-import com.alibaba.fastjson.JSONObject;
-
-import java.util.Comparator;
 import java.util.Date;
 
 /**
