@@ -1,10 +1,15 @@
 package com.zxd.lottery.doubleball.crawler;
 
+import com.zxd.lottery.doubleball.crawler.dao.mapper.ResultDao;
 import com.zxd.lottery.doubleball.crawler.dao.model.ResultDto;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +30,7 @@ import static java.lang.Thread.currentThread;
  * @Version 1.0
  * @create 2018-10-26 0:35
  **/
+@Service
 public class DoubleBallCrawler {
 
     private static String url_prefix = "http://kaijiang.500.com/shtml/ssq/";
@@ -50,14 +56,17 @@ public class DoubleBallCrawler {
 
     private static List<String> failureNums = new Vector<String>(10);
 
+    @Autowired
+    private static ResultDao resultDao;
+
     public static void main(String[] args) throws Exception{
         //批量抓取所有
 //        crawlerForBatch();
 
 //        //抓取单期开奖结果
-        ResultDto resultDto = crawlerForOnce("18127");
-        resultDtoList.add(resultDto);
-        writeLotteryInfoToFile(fileName,resultDtoList);
+//        ResultDto resultDto = crawlerForOnce("18127");
+//        resultDtoList.add(resultDto);
+//        writeLotteryInfoToFile(fileName,resultDtoList);
 
         //将批量信息写入本地
 //        writeLotteryInfoToFile(fileName,resultDtoList);
@@ -69,6 +78,11 @@ public class DoubleBallCrawler {
 //        numbersList = Arrays.asList(failureArrays);
 //        crawlerBarchForFailure(numbersList);
 //        writeLotteryInfoToFile(fileName,resultDtoList);
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
+        ResultDao resultDao = applicationContext.getBean(ResultDao.class);
+        ResultDto resultDto1 = new ResultDto();
+        resultDto1.setNumber("123");
+        resultDao.insert(resultDto1);
     }
 
     /**
