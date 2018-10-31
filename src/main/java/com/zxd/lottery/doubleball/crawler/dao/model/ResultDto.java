@@ -35,10 +35,10 @@ public class ResultDto implements Comparable<ResultDto>{
     private String blue;
 
     //开奖日期
-    private Date openDate;
+    private Date opendate;
 
     //兑奖截止日期
-    private Date deadlineDate;
+    private Date deadlinedate;
 
     //预留扩展字段
     private String extend;
@@ -107,20 +107,20 @@ public class ResultDto implements Comparable<ResultDto>{
         this.blue = blue;
     }
 
-    public Date getOpenDate() {
-        return openDate;
+    public Date getOpendate() {
+        return opendate;
     }
 
-    public void setOpenDate(Date openDate) {
-        this.openDate = openDate;
+    public void setOpendate(Date openDate) {
+        this.opendate = openDate;
     }
 
-    public Date getDeadlineDate() {
-        return deadlineDate;
+    public Date getDeadlinedate() {
+        return deadlinedate;
     }
 
-    public void setDeadlineDate(Date deadlineDate) {
-        this.deadlineDate = deadlineDate;
+    public void setDeadlinedate(Date deadlineDate) {
+        this.deadlinedate = deadlineDate;
     }
 
     public String getExtend() {
