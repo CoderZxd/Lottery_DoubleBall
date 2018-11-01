@@ -111,16 +111,16 @@ public class ResultDto implements Comparable<ResultDto>{
         return opendate;
     }
 
-    public void setOpendate(Date openDate) {
-        this.opendate = openDate;
+    public void setOpendate(Date opendate) {
+        this.opendate = opendate;
     }
 
     public Date getDeadlinedate() {
         return deadlinedate;
     }
 
-    public void setDeadlinedate(Date deadlineDate) {
-        this.deadlinedate = deadlineDate;
+    public void setDeadlinedate(Date deadlinedate) {
+        this.deadlinedate = deadlinedate;
     }
 
     public String getExtend() {

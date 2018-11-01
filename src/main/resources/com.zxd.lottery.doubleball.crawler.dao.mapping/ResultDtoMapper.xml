@@ -36,6 +36,13 @@
     from result
     where number = #{number,jdbcType=VARCHAR}
   </select>
+
+  <select id="getAll" resultType="com.zxd.lottery.doubleball.crawler.dao.model.ResultDto">
+    select
+    <include refid="Base_Column_List" />
+    from result
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     <!--
       WARNING - @mbggenerated

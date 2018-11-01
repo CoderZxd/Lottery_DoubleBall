@@ -29,8 +29,8 @@ CREATE TABLE `result` (
   `red5` varchar(255) DEFAULT NULL,
   `red6` varchar(255) DEFAULT NULL,
   `blue` varchar(255) DEFAULT NULL,
-  `openDate` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `deadlineDate` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `opendate` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `deadlinedate` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `extend` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
