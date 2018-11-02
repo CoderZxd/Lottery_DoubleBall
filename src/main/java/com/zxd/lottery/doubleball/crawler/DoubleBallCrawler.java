@@ -1,6 +1,8 @@
 package com.zxd.lottery.doubleball.crawler;
 
+import com.zxd.lottery.doubleball.crawler.dao.mapper.NumberTimesDao;
 import com.zxd.lottery.doubleball.crawler.dao.mapper.ResultDao;
+import com.zxd.lottery.doubleball.crawler.dao.model.NumberTimes;
 import com.zxd.lottery.doubleball.crawler.dao.model.ResultDto;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -81,6 +83,7 @@ public class DoubleBallCrawler {
         //将之前抓取的结果从文件中存入db
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
         ResultDao resultDao = applicationContext.getBean(ResultDao.class);
+        NumberTimesDao numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
 //        List<ResultDto> resultDtoList = getResultDtoFromFile();
 //        for(ResultDto resultDto:resultDtoList){
 //            resultDao.insert(resultDto);
@@ -90,13 +93,144 @@ public class DoubleBallCrawler {
 //        ResultDto resultDto = crawlerForOnce("18128");
 //        resultDao.insert(resultDto);
 
-//        List<ResultDto> list = resultDao.getAll();
+        List<ResultDto> list = resultDao.getAll();
+        Map<String,NumberTimes> result = calculateNumTimes(list);
+        for(Map.Entry<String,NumberTimes> entry:result.entrySet()){
+            numberTimesDao.insert(entry.getValue());
+        }
     }
 
-    public static void calculateNumTimes(List<ResultDto> resultDtos){
-        Map<String,Map<String,Integer>> result = new HashMap<String,Map<String,Integer>>(16);
+    public static Map<String,NumberTimes> calculateNumTimes(List<ResultDto> resultDtos){
+        Map<String,NumberTimes> result = new HashMap<String,NumberTimes>(16);
+        for(ResultDto resultDto:resultDtos){
+            generateResult(resultDto.getRed1(),BallType.RED1,result);
+            generateResult(resultDto.getRed2(),BallType.RED2,result);
+            generateResult(resultDto.getRed3(),BallType.RED3,result);
+            generateResult(resultDto.getRed4(),BallType.RED4,result);
+            generateResult(resultDto.getRed5(),BallType.RED5,result);
+            generateResult(resultDto.getRed6(),BallType.RED6,result);
+            generateResult(resultDto.getBlue(),BallType.BLUE,result);
+        }
+        return result;
     }
 
+    private static void generateResult(String number,BallType ballType,Map<String,NumberTimes> result){
+        if(result.containsKey(ballType.name())){
+            NumberTimes numberTimes = result.get(ballType.name());
+            setNumsValue(number,numberTimes);
+        }else{
+            NumberTimes numberTimes = new NumberTimes();
+            numberTimes.setId(ballType.name());
+            setNumsValue(number,numberTimes);
+            result.put(ballType.name(),numberTimes);
+        }
+    }
+
+    private static void setNumsValue(String num,NumberTimes numberTimes){
+        switch (num){
+            case "01":
+                numberTimes.setNum01(numberTimes.getNum01()+1);
+                break;
+            case "02":
+                numberTimes.setNum02(numberTimes.getNum02()+1);
+                break;
+            case "03":
+                numberTimes.setNum03(numberTimes.getNum03()+1);
+                break;
+            case "04":
+                numberTimes.setNum04(numberTimes.getNum04()+1);
+                break;
+            case "05":
+                numberTimes.setNum05(numberTimes.getNum05()+1);
+                break;
+            case "06":
+                numberTimes.setNum06(numberTimes.getNum06()+1);
+                break;
+            case "07":
+                numberTimes.setNum07(numberTimes.getNum07()+1);
+                break;
+            case "08":
+                numberTimes.setNum08(numberTimes.getNum08()+1);
+                break;
+            case "09":
+                numberTimes.setNum09(numberTimes.getNum09()+1);
+                break;
+            case "10":
+                numberTimes.setNum10(numberTimes.getNum10()+1);
+                break;
+            case "11":
+                numberTimes.setNum11(numberTimes.getNum11()+1);
+                break;
+            case "12":
+                numberTimes.setNum12(numberTimes.getNum12()+1);
+                break;
+            case "13":
+                numberTimes.setNum13(numberTimes.getNum13()+1);
+                break;
+            case "14":
+                numberTimes.setNum14(numberTimes.getNum14()+1);
+                break;
+            case "15":
+                numberTimes.setNum15(numberTimes.getNum15()+1);
+                break;
+            case "16":
+                numberTimes.setNum16(numberTimes.getNum16()+1);
+                break;
+            case "17":
+                numberTimes.setNum17(numberTimes.getNum17()+1);
+                break;
+            case "18":
+                numberTimes.setNum18(numberTimes.getNum18()+1);
+                break;
+            case "19":
+                numberTimes.setNum19(numberTimes.getNum19()+1);
+                break;
+            case "20":
+                numberTimes.setNum20(numberTimes.getNum20()+1);
+                break;
+            case "21":
+                numberTimes.setNum21(numberTimes.getNum21()+1);
+                break;
+            case "22":
+                numberTimes.setNum22(numberTimes.getNum22()+1);
+                break;
+            case "23":
+                numberTimes.setNum23(numberTimes.getNum23()+1);
+                break;
+            case "24":
+                numberTimes.setNum24(numberTimes.getNum24()+1);
+                break;
+            case "25":
+                numberTimes.setNum25(numberTimes.getNum25()+1);
+                break;
+            case "26":
+                numberTimes.setNum26(numberTimes.getNum26()+1);
+                break;
+            case "27":
+                numberTimes.setNum27(numberTimes.getNum27()+1);
+                break;
+            case "28":
+                numberTimes.setNum28(numberTimes.getNum28()+1);
+                break;
+            case "29":
+                numberTimes.setNum29(numberTimes.getNum29()+1);
+                break;
+            case "30":
+                numberTimes.setNum30(numberTimes.getNum30()+1);
+                break;
+            case "31":
+                numberTimes.setNum31(numberTimes.getNum31()+1);
+                break;
+            case "32":
+                numberTimes.setNum32(numberTimes.getNum32()+1);
+                break;
+            case "33":
+                numberTimes.setNum33(numberTimes.getNum33()+1);
+                break;
+            default:
+                break;
+        }
+    }
     /**
      * class_name: getResultDtoFromFile
      * param: []
