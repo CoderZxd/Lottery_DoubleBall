@@ -87,11 +87,14 @@ public class DoubleBallCrawler {
 //        }
 
         //抓取单次开奖记录插入数据库
-        ResultDto resultDto = crawlerForOnce("18128");
-        resultDao.insert(resultDto);
+//        ResultDto resultDto = crawlerForOnce("18128");
+//        resultDao.insert(resultDto);
 
 //        List<ResultDto> list = resultDao.getAll();
-//        System.out.println();
+    }
+
+    public static void calculateNumTimes(List<ResultDto> resultDtos){
+        Map<String,Map<String,Integer>> result = new HashMap<String,Map<String,Integer>>(16);
     }
 
     /**
