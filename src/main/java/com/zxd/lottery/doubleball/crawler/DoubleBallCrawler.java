@@ -100,6 +100,14 @@ public class DoubleBallCrawler {
         }
     }
 
+    /**
+     * class_name: calculateNumTimes
+     * param: [resultDtos]
+     * describe: 统计各个球的出现次数
+     * creat_user: CoderZZ
+     * creat_date: 2018-11-03
+     * creat_time: 1:05
+     **/
     public static Map<String,NumberTimes> calculateNumTimes(List<ResultDto> resultDtos){
         Map<String,NumberTimes> result = new HashMap<String,NumberTimes>(16);
         for(ResultDto resultDto:resultDtos){
@@ -114,6 +122,14 @@ public class DoubleBallCrawler {
         return result;
     }
 
+    /**
+     * class_name: generateResult
+     * param: [number, ballType, result]
+     * describe: 处理单注开奖结果，将出现的数字在指定的球上+1
+     * creat_user: CoderZZ
+     * creat_date: 2018-11-03
+     * creat_time: 1:05
+     **/
     private static void generateResult(String number,BallType ballType,Map<String,NumberTimes> result){
         if(result.containsKey(ballType.name())){
             NumberTimes numberTimes = result.get(ballType.name());
@@ -126,6 +142,14 @@ public class DoubleBallCrawler {
         }
     }
 
+    /**
+     * class_name: setNumsValue
+     * param: [num, numberTimes]
+     * describe: TODO
+     * creat_user: CoderZZ
+     * creat_date: 2018-11-03
+     * creat_time: 1:06
+     **/
     private static void setNumsValue(String num,NumberTimes numberTimes){
         switch (num){
             case "01":
