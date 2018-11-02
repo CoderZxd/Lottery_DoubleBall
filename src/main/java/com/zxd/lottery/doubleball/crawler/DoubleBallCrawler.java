@@ -86,8 +86,12 @@ public class DoubleBallCrawler {
 //            resultDao.insert(resultDto);
 //        }
 
-        List<ResultDto> list = resultDao.getAll();
-        System.out.println();
+        //抓取单次开奖记录插入数据库
+        ResultDto resultDto = crawlerForOnce("18128");
+        resultDao.insert(resultDto);
+
+//        List<ResultDto> list = resultDao.getAll();
+//        System.out.println();
     }
 
     /**
