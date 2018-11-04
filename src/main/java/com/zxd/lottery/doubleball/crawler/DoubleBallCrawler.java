@@ -84,7 +84,7 @@ public class DoubleBallCrawler {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
         resultDao = applicationContext.getBean(ResultDao.class);
         //增量抓取历史开奖信息
-        incrementCrawler();
+//        incrementCrawler();
 
 
         //将之前抓取的结果从文件中存入db
@@ -99,12 +99,18 @@ public class DoubleBallCrawler {
 
 
         //计算各个球的出现次数
-//        List<ResultDto> list = resultDao.getAll();
-//        Map<String,NumberTimes> result = calculateNumTimes(list);
-//        numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
-//        for(Map.Entry<String,NumberTimes> entry:result.entrySet()){
-//            numberTimesDao.insert(entry.getValue());
-//        }
+        List<ResultDto> list = resultDao.getAll();
+        Map<String,NumberTimes> result = calculateNumTimes(list);
+        numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
+        //是否是更新而不是插入
+        boolean isUpdate = true;
+        for(Map.Entry<String,NumberTimes> entry:result.entrySet()){
+            if(isUpdate){
+                numberTimesDao.updateByPrimaryKey(entry.getValue());
+            }else{
+                numberTimesDao.insert(entry.getValue());
+            }
+        }
     }
 
     /**
