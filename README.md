@@ -1,6 +1,6 @@
 # Lottery_DoubleBall(双色球)
 
-#一共期数为:*2333*
+#一共期数为:*2335*
 
 ````
 双色球 第03001期,详情地址:http://kaijiang.500.com/shtml/ssq/03001.shtml,开奖号码:10 11 12 13 26 28 | 11
@@ -2336,4 +2336,6 @@
 双色球 第18125期,详情地址:http://kaijiang.500.com/shtml/ssq/18125.shtml,开奖号码:03 10 11 14 15 32 | 02
 双色球 第18126期,详情地址:http://kaijiang.500.com/shtml/ssq/18126.shtml,开奖号码:01 06 08 09 14 22 | 05
 双色球 第18127期,详情地址:http://kaijiang.500.com/shtml/ssq/18127.shtml,开奖号码:02 05 06 07 11 15 | 12
+双色球 第18128期,详情地址:http://kaijiang.500.com/shtml/ssq/18128.shtml,开奖号码:06 07	08 19 22 23	| 02			
+双色球 第18129期,详情地址:http://kaijiang.500.com/shtml/ssq/18129.shtml,开奖号码:02	 04	06 16 18 19	| 16			
 ````
