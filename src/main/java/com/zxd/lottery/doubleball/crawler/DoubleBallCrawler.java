@@ -56,8 +56,9 @@ public class DoubleBallCrawler {
 
     private static List<String> failureNums = new Vector<String>(10);
 
-    @Autowired
     private static ResultDao resultDao;
+
+    private static NumberTimesDao numberTimesDao;
 
     public static void main(String[] args) throws Exception{
         //批量抓取所有
@@ -80,10 +81,13 @@ public class DoubleBallCrawler {
 //        writeLotteryInfoToFile(fileName,resultDtoList);
 
 
-        //将之前抓取的结果从文件中存入db
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
-        ResultDao resultDao = applicationContext.getBean(ResultDao.class);
-        NumberTimesDao numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
+        resultDao = applicationContext.getBean(ResultDao.class);
+        //增量抓取历史开奖信息
+        incrementCrawler();
+
+
+        //将之前抓取的结果从文件中存入db
 //        List<ResultDto> resultDtoList = getResultDtoFromFile();
 //        for(ResultDto resultDto:resultDtoList){
 //            resultDao.insert(resultDto);
@@ -93,13 +97,52 @@ public class DoubleBallCrawler {
 //        ResultDto resultDto = crawlerForOnce("18128");
 //        resultDao.insert(resultDto);
 
-        List<ResultDto> list = resultDao.getAll();
-        Map<String,NumberTimes> result = calculateNumTimes(list);
-        for(Map.Entry<String,NumberTimes> entry:result.entrySet()){
-            numberTimesDao.insert(entry.getValue());
-        }
+
+        //计算各个球的出现次数
+//        List<ResultDto> list = resultDao.getAll();
+//        Map<String,NumberTimes> result = calculateNumTimes(list);
+//        numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
+//        for(Map.Entry<String,NumberTimes> entry:result.entrySet()){
+//            numberTimesDao.insert(entry.getValue());
+//        }
     }
 
+    /**
+     * class_name: incrementCrawler
+     * param: []
+     * describe: 增量爬取往期历史记录保存入db
+     * creat_user: CoderZZ
+     * creat_date: 2018-11-05
+     * creat_time: 0:07
+     **/
+    public static void incrementCrawler(){
+        try {
+            Set<String> numbersSet = new HashSet<String>(16);
+            Document doc = Jsoup.connect(url).get();
+            Elements aElements =doc.select(".iSelectList > a");
+            if(null != aElements) {
+                System.out.println("incrementCrawler====>一共期数为:" + aElements.size());
+                for (Element aEle : aElements) {
+                    numbersSet.add(aEle.text());
+                }
+            }
+            List<ResultDto> resultDtoList = resultDao.getAll();
+            for(ResultDto resultDto:resultDtoList){
+                if(numbersSet.contains(resultDto.getNumber())){
+                    numbersSet.remove(resultDto.getNumber());
+                }
+            }
+            if(!numbersSet.isEmpty()){
+                for(String number:numbersSet){
+                    ResultDto resultDto = crawlerForOnce(number);
+                    System.out.println("增量抓取========>>>>>>>>>"+resultDto.toString());
+                    resultDao.insert(resultDto);
+                }
+            }
+        }catch (Exception e){
+
+        }
+    }
     /**
      * class_name: calculateNumTimes
      * param: [resultDtos]
