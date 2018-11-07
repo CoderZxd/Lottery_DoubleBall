@@ -84,8 +84,7 @@ public class DoubleBallCrawler {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
         resultDao = applicationContext.getBean(ResultDao.class);
         //增量抓取历史开奖信息
-//        incrementCrawler();
-
+        incrementCrawler();
 
         //将之前抓取的结果从文件中存入db
 //        List<ResultDto> resultDtoList = getResultDtoFromFile();
@@ -139,11 +138,15 @@ public class DoubleBallCrawler {
                 }
             }
             if(!numbersSet.isEmpty()){
+                List<ResultDto> appendResultDto = new ArrayList<ResultDto>(10);
                 for(String number:numbersSet){
                     ResultDto resultDto = crawlerForOnce(number);
                     System.out.println("增量抓取========>>>>>>>>>"+resultDto.toString());
+                    appendResultDto.add(resultDto);
                     resultDao.insert(resultDto);
                 }
+                //增量结果写文件
+                writeLotteryInfoToFile(fileName,appendResultDto);
             }
         }catch (Exception e){
 
@@ -580,7 +583,7 @@ public class DoubleBallCrawler {
                     fos.write(resultDto.toString().concat("\n").getBytes("UTF-8"));
                 }
             }
-            fos.write("===============================================分割线===============================================".concat("\n").getBytes("UTF-8"));
+//            fos.write("===============================================分割线===============================================".concat("\n").getBytes("UTF-8"));
             fos.close();
         } catch (Exception e) {
             System.err.println("开奖信息写入本地文件异常.异常信息为:"+e.getMessage());
