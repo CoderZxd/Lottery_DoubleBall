@@ -179,4 +179,14 @@ public class ResultDto implements Comparable<ResultDto>{
     public int compareTo(ResultDto o) {
         return o.getNumber().compareTo(this.getNumber());
     }
+
+    @Override
+    public int hashCode(){
+        return Integer.parseInt(this.getNumber());
+    }
+
+    @Override
+    public boolean equals(Object resultDto){
+        return this.getNumber().equals(((ResultDto)resultDto).getNumber());
+    }
 }

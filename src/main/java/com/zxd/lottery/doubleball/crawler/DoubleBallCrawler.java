@@ -8,12 +8,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -60,8 +61,9 @@ public class DoubleBallCrawler {
 
     private static NumberTimesDao numberTimesDao;
 
-    public static void main(String[] args) throws Exception{
-        //批量抓取所有
+    public static void main(String[] args){
+        try {
+            //批量抓取所有
 //        crawlerForBatch();
 
 //        //抓取单期开奖结果
@@ -69,11 +71,11 @@ public class DoubleBallCrawler {
 //        resultDtoList.add(resultDto);
 //        writeLotteryInfoToFile(fileName,resultDtoList);
 
-        //将批量信息写入本地
+            //将批量信息写入本地
 //        writeLotteryInfoToFile(fileName,resultDtoList);
 
 
-        //以下逻辑为抓取失败的开奖结果
+            //以下逻辑为抓取失败的开奖结果
 //        String[] failureArrays = new String[]{"09092","09097","09102","09107","09108","09112","09114","09117","09118","09121","09122","09124","09127","09128","09131","09132","09134","09137","09138","09141","09142","09144","09147","09148","09149","09151","09152","09154","10003","10004","10005","10007","10008","10010","10013","10014","10015","10017","10018","10020","10023","10024","10025","10027","10028","10030","10033","10034","10035","10037","10038","10040","10043","10044","10045","10047","10048","10050","10053","10054","10055","10057","10058","10060","10063","10064","10065","10067","10068","10070","10073","10074","10075","10077","10078","10080","10083","10084","10085","10087","10088","10090","10093","10094","10095","10097","10098","10100","10103","10104","10105","10107","10108","10109","10110","10113","10114","10115","10117","10118","10119","10120","10123","10124","10125","10126","10127","10128","10129","10130","10132","10133","10134","10135","10136","10137","10138","10139","10140","10141","10142","10143","10144","10145","10146","10147","10148","10149","10150","10151","10152","10153","11001","11002","11003","11004","11005","11006","11007","11008","11009","11010","11011","11012","11013","11014","11015","11016","11017","11018","11019","11020","11021","11022","11023","11024","11025","11026","11027","11028","11029","11030","11031","11032","11033","11034","11035","11036","11037","11038","11039","11040","11041","11042","11043","11044","11045","11046","11047","11048","11049","11050","11051","11052","11053","11054","11055","11056","11057","11058","11059","11060","11061","11062","11063","11064","11065","11066","11067","11068","11069","11070","11071","11072","11073","11074","11075","11076","11077","11078","11079","11080","11081","11082","11083","11084","11085","11086","11087","11088","11089","11090","11091","11092","11093","11094","11095","11096","11097","11098","11099","11100","11101","11102","11103","11104","11105","11106","11107","11108","11109","11110","11111","11112","11113","11114","11115","11116","11117","11118","11119","11120","11121","11122","11123","11124","11125","11126","11127","11128","11129","11130","11131","11132","11133","11134","11135","11136","11137","11138","11139","11140","11141","11142","11143","11144","11145","11146","11147","11148","11149","11150","11151","11152","11153","12001","12002","12003","12004","12005","12007","12008","12009","12010","12011","12012","12013","12014","12015","12017","12018","12019","12020","12021","12022","12023","12024","12025","12028","12033","12034","12035","12038","12043","12044","12045","12048","12053","12054","12055","12058","12063","12064","12065","12068","12073","12074","12075","12078","12083","12084","12085","12088","12093","12094","12095","12098","12103","12104","12105","12113","12114","12115","12123","12124","12133","12134","12143","12144","12153","12154","13009","13010","13019","13020","13029","13030","13040","13050"};
 //        List<String> numbersList = new ArrayList<String>(failureArrays.length);
 //        numbersList = Arrays.asList(failureArrays);
@@ -81,35 +83,114 @@ public class DoubleBallCrawler {
 //        writeLotteryInfoToFile(fileName,resultDtoList);
 
 
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
-        resultDao = applicationContext.getBean(ResultDao.class);
-        //增量抓取历史开奖信息
-        incrementCrawler();
+            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("crawler-application.xml");
+            resultDao = applicationContext.getBean(ResultDao.class);
+            numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
+            //增量抓取历史开奖信息并写入${fileName}中
+            incrementCrawler();
 
-        //将之前抓取的结果从文件中存入db
-//        List<ResultDto> resultDtoList = getResultDtoFromFile();
-//        for(ResultDto resultDto:resultDtoList){
-//            resultDao.insert(resultDto);
-//        }
+            //将之前抓取的结果从文件中增量存入db
+            List<ResultDto> resultDtoList = getResultDtoFromFile();
+            List<ResultDto> savedList = resultDao.getAll();
+            boolean needUpdate = false;
+            for (ResultDto resultDto : resultDtoList) {
+                if (!savedList.contains(resultDto)) {
+                    needUpdate = true;
+                    System.out.println("增量插入数据库:" + resultDto.getNumber());
+                    resultDao.insert(resultDto);
+                }
+            }
 
-        //抓取单次开奖记录插入数据库
+            //抓取单次开奖记录插入数据库
 //        ResultDto resultDto = crawlerForOnce("18128");
 //        resultDao.insert(resultDto);
 
 
-        //计算各个球的出现次数
-        List<ResultDto> list = resultDao.getAll();
-        Map<String,NumberTimes> result = calculateNumTimes(list);
-        numberTimesDao = applicationContext.getBean(NumberTimesDao.class);
-        //是否是更新而不是插入
-        boolean isUpdate = true;
-        for(Map.Entry<String,NumberTimes> entry:result.entrySet()){
-            if(isUpdate){
-                numberTimesDao.updateByPrimaryKey(entry.getValue());
+            //计算各个球的出现次数
+            if (needUpdate) {
+                List<ResultDto> list = resultDao.getAll();
+                Map<String, NumberTimes> result = calculateNumTimes(list);
+                //是否是更新而不是插入
+                boolean isUpdate = true;
+                for (Map.Entry<String, NumberTimes> entry : result.entrySet()) {
+                    if (isUpdate) {
+                        numberTimesDao.updateByPrimaryKey(entry.getValue());
+                    } else {
+                        numberTimesDao.insert(entry.getValue());
+                    }
+                }
+            }
+            //forecast
+            List<NumberTimes> numberTimesLists = numberTimesDao.getAll();
+            countAndForecast(numberTimesLists);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName countAndForecast
+     * @Desc 统计并预测
+     * @author zouxiaodong
+     * @date 2018/11/8 20:16
+     * @Params [numberTimesLists]
+     * @return void
+     */
+    private static void countAndForecast(List<NumberTimes> numberTimesLists) throws InvocationTargetException, IllegalAccessException {
+        Method[] methodArray = NumberTimes.class.getDeclaredMethods();
+        Map<String,Integer> countRed = new TreeMap<String,Integer>();
+        Map<String,Integer> countBlue = new TreeMap<String,Integer>();
+        for(NumberTimes numberTimes:numberTimesLists){
+            if(!"BLUE".equals(numberTimes.getId())){
+                for (int i = 0; i < methodArray.length; i++) {
+                    Method method = methodArray[i];
+                    String methodName = method.getName();
+                    if(methodName.startsWith("getNum")){
+                        Integer times = (Integer) method.invoke(numberTimes);
+                        String key = methodName.substring(3);
+                        if(countRed.containsKey(key)){
+                            countRed.put(key,countRed.get(key)+times);
+                        }else{
+                            countRed.put(key,times);
+                        }
+                    }
+                }
             }else{
-                numberTimesDao.insert(entry.getValue());
+                for (int i = 0; i < methodArray.length; i++) {
+                    Method method = methodArray[i];
+                    String methodName = method.getName();
+                    if(methodName.startsWith("getNum")){
+                        Integer times = (Integer) method.invoke(numberTimes);
+                        countBlue.put(methodName.substring(3),times);
+                    }
+                }
             }
         }
+        System.out.println(">>>>>>>>"+countRed);
+        System.out.println(">>>>>>>>"+countBlue);
+        System.out.println("=========================================================");
+        //排序
+        Map<Integer,String> redSortMap = new TreeMap<Integer,String>();
+        Map<Integer,String> blueSortMap = new TreeMap<Integer,String>();
+        for(Map.Entry<String,Integer> ele:countRed.entrySet()){
+            String key = ele.getKey();
+            Integer value = ele.getValue();
+            if(redSortMap.containsKey(value)){
+                redSortMap.put(value,redSortMap.get(value)+","+key);
+            }else{
+                redSortMap.put(value,key);
+            }
+        }
+        for(Map.Entry<String,Integer> ele:countBlue.entrySet()){
+            String key = ele.getKey();
+            Integer value = ele.getValue();
+            blueSortMap.put(value,key);
+        }
+        System.out.println("<<<<<<<<"+redSortMap);
+        System.out.println("<<<<<<<<"+blueSortMap);
+        //forecast
     }
 
     /**
@@ -149,7 +230,7 @@ public class DoubleBallCrawler {
                 writeLotteryInfoToFile(fileName,appendResultDto);
             }
         }catch (Exception e){
-
+            System.out.println("增量爬取异常.异常信息为:"+e.getMessage());
         }
     }
     /**
