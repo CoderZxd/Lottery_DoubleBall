@@ -172,8 +172,18 @@ public class DoubleBallCrawler {
         System.out.println(">>>>>>>>"+countBlue);
         System.out.println("=========================================================");
         //排序
-        Map<Integer,String> redSortMap = new TreeMap<Integer,String>();
-        Map<Integer,String> blueSortMap = new TreeMap<Integer,String>();
+        Map<Integer,String> redSortMap = new TreeMap<Integer,String>(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2 - o1;
+            }
+        });
+        Map<Integer,String> blueSortMap = new TreeMap<Integer,String>(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2 - o1;
+            }
+        });
         for(Map.Entry<String,Integer> ele:countRed.entrySet()){
             String key = ele.getKey();
             Integer value = ele.getValue();
@@ -190,6 +200,21 @@ public class DoubleBallCrawler {
         }
         System.out.println("<<<<<<<<"+redSortMap);
         System.out.println("<<<<<<<<"+blueSortMap);
+        System.out.println("=========================================================");
+        List<String> redCountList = new ArrayList<String>(33);
+        List<String> blueCountList = new ArrayList<String>(17);
+        for(Map.Entry<Integer,String> red:redSortMap.entrySet()){
+            Integer count = red.getKey();
+            String nums = red.getValue();
+            redCountList.add(count+"="+nums);
+        }
+        for(Map.Entry<Integer,String> blue:blueSortMap.entrySet()){
+            Integer count = blue.getKey();
+            String nums = blue.getValue();
+            blueCountList.add(count+"="+nums);
+        }
+        System.out.println(">>>>>>>>"+redCountList);
+        System.out.println(">>>>>>>>"+blueCountList);
         //forecast
     }
 
