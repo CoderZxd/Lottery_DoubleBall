@@ -52,6 +52,8 @@ public class DoubleBallCrawler {
     //抓取成功期数开奖信息写入该文件
     private static String fileName = "lottery.txt";
 
+    private static String forecast = "Forecast.md";
+
     //抓取失败的期数写入该文件
     private static String failureNumFileName = "failure.txt";
 
@@ -121,8 +123,15 @@ public class DoubleBallCrawler {
                 }
             }
             //forecast
+            //获取下一期期号
+            List<ResultDto> list = resultDao.getAll();
+            Collections.sort(list);
+            ResultDto result = list.get(0);
+            String number = result.getNumber();
+            Integer nextNum = Integer.parseInt(number)+1;
+            System.out.println("下一期的期号为:"+nextNum);
             List<NumberTimes> numberTimesLists = numberTimesDao.getAll();
-            countAndForecast(numberTimesLists);
+            countAndForecast(numberTimesLists,nextNum);
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
@@ -138,7 +147,7 @@ public class DoubleBallCrawler {
      * @Params [numberTimesLists]
      * @return void
      */
-    private static void countAndForecast(List<NumberTimes> numberTimesLists) throws InvocationTargetException, IllegalAccessException {
+    private static void countAndForecast(List<NumberTimes> numberTimesLists,Integer nextNum ) throws InvocationTargetException, IllegalAccessException {
         Method[] methodArray = NumberTimes.class.getDeclaredMethods();
         Map<String,Integer> countRed = new TreeMap<String,Integer>();
         Map<String,Integer> countBlue = new TreeMap<String,Integer>();
@@ -196,7 +205,11 @@ public class DoubleBallCrawler {
         for(Map.Entry<String,Integer> ele:countBlue.entrySet()){
             String key = ele.getKey();
             Integer value = ele.getValue();
-            blueSortMap.put(value,key);
+            if(blueSortMap.containsKey(value)){
+                blueSortMap.put(value,blueSortMap.get(value)+","+key);
+            }else{
+                blueSortMap.put(value,key);
+            }
         }
         System.out.println("<<<<<<<<"+redSortMap);
         System.out.println("<<<<<<<<"+blueSortMap);
@@ -215,7 +228,90 @@ public class DoubleBallCrawler {
         }
         System.out.println(">>>>>>>>"+redCountList);
         System.out.println(">>>>>>>>"+blueCountList);
-        //forecast
+        forecastAndWriteToFile(redCountList,blueCountList,forecast,nextNum);
+    }
+
+    /**
+     * @FileName DoubleBallCrawler.java
+     * @ClassName DoubleBallCrawler
+     * @MethodName writeForecastToFile
+     * @Desc 预测结果写本地
+     * @author zouxiaodong
+     * @date 2018/11/9 14:21
+     * @Params [fileName, comment]
+     * @return void
+     */
+    private static void forecastAndWriteToFile(List<String> redCountList,List<String> blueCountList,String fileName,Integer nextNum ){
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(fileName),true);
+            //forecast:largest
+            List<String> forecast = new ArrayList<String>(10);
+            for(int i=0;i<redCountList.size();i++){
+                if(forecast.size()>=6){
+                    break;
+                }
+                String ele = redCountList.get(i);
+                String[] eleArray = ele.split("=");
+                String num = eleArray[1];
+                String[] numArray = num.split(",");
+                for(int j=0;j<numArray.length;j++){
+                    System.out.println("当前元素为:"+ redCountList.get(i));
+                    if(forecast.size() < 6){
+                        forecast.add(numArray[j].substring(3));
+                    }else{
+                        System.out.println("forecast已满。"+numArray[j].substring(3)+"丢弃");
+                    }
+                }
+            }
+            Collections.sort(forecast);
+            String ele = blueCountList.get(0);
+            String[] eleArray = ele.split("=");
+            String num = eleArray[1];
+            String[] numArray = num.split(",");
+            StringBuffer blue = new StringBuffer("(");
+            for(int j=0;j<numArray.length;j++){
+                blue.append(numArray[j].substring(3)).append("|");
+            }
+            blue.deleteCharAt(blue.lastIndexOf("|"));
+            blue.append(")");
+            forecast.add(blue.toString());
+            fos.write("###Forecast ".concat(nextNum.toString()).concat(" by largest:").concat(forecast.toString()).concat("\n").getBytes("UTF-8"));
+            forecast.clear();
+            //forecast:least
+            for(int i=redCountList.size()-1;i>=0;i--){
+                if(forecast.size()>=6){
+                    break;
+                }
+                String eles = redCountList.get(i);
+                String[] elesArray = eles.split("=");
+                String nums = elesArray[1];
+                String[] numsArray = nums.split(",");
+                for(int j=0;j<numsArray.length;j++){
+                    System.out.println("当前元素为:"+ redCountList.get(i));
+                    if(forecast.size() < 6){
+                        forecast.add(numsArray[j].substring(3));
+                    }else{
+                        System.out.println("forecast已满。"+numsArray[j].substring(3)+"丢弃");
+                    }
+                }
+            }
+            Collections.sort(forecast);
+            String element = blueCountList.get(blueCountList.size()-2);
+            String[] elementArray = element.split("=");
+            String number = elementArray[1];
+            String[] numberArray = number.split(",");
+            StringBuffer sb = new StringBuffer("(");
+            for(int j=0;j<numberArray.length;j++){
+                sb.append(numberArray[j].substring(3)).append("|");
+            }
+            sb.deleteCharAt(sb.lastIndexOf("|"));
+            sb.append(")");
+            forecast.add(sb.toString());
+            fos.write("###Forecast ".concat(nextNum.toString()).concat(" by least  :").concat(forecast.toString()).concat("\n").getBytes("UTF-8"));
+            fos.close();
+        } catch (Exception e) {
+            System.err.println("预测信息写入本地文件异常.异常信息为:"+e.getMessage());
+        }
     }
 
     /**
