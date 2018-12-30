@@ -18,3 +18,5 @@
 ###Forecast 18143 by least  :[15, 24, 28, 29, 31, 33, (08)]
 ###Forecast 18150 by largest:[01, 08, 14, 20, 22, 26, (12)]
 ###Forecast 18150 by least  :[15, 24, 28, 29, 31, 33, (08)]
+###Forecast 18154 by largest:[01, 08, 14, 20, 22, 26, (12)]
+###Forecast 18154 by least  :[15, 24, 28, 29, 31, 33, (08)]
