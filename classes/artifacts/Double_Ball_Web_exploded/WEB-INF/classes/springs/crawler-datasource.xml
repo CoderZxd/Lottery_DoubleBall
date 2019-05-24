@@ -22,7 +22,6 @@
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="mapperLocations" value="classpath:com.zxd.lottery.doubleball.crawler.dao.mapping/*.xml"/>
-        <!-- <property name="configLocation" value="/WEB-INF/batis/com.mobanker.component.logcenter.service.daofig.xml" /> -->
         <!-- 自动扫描entity目录, 省掉Configuration.xml里的手工配置 -->
     </bean>
     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
